@@ -19,24 +19,24 @@ if number5 > max:
     max = number5
 print('max v.1 = ', max)
 
-list = [0, 0, 0, 0, 0]
-for i in range(len(list)):
-    list[i] = int(input('Введите число № : '))
-print(list)
-max = list[0]
-for i in range(len(list)):
-    if list[i] > max:
-        max = list[i]
+my_list = [0, 0, 0, 0, 0]
+for i in range(len(my_list)):
+    my_list[i] = int(input('Введите число № : '))
+print(my_list)
+max = my_list[0]
+for i in range(len(my_list)):
+    if my_list[i] > max:
+        max = my_list[i]
 print('max v.2 = ', max)
 
-list = []
+my_list = []
 for i in range(5):
-  list.append(int(input('Введите число № : ')))
-print(list)
-max = list[0]
-for i in range(len(list)):
-    if list[i] > max:
-        max = list[i]
+  my_list.append(int(input('Введите число № : ')))
+print(my_list)
+max = my_list[0]
+for i in range(len(my_list)):
+    if my_list[i] > max:
+        max = my_list[i]
 print('max v.3 = ', max)
 
 number1 = int(input('Введите первое число: '))
@@ -44,12 +44,12 @@ number2 = int(input('Введите второе число: '))
 number3 = int(input('Введите третье число: '))
 number4 = int(input('Введите четвертое число: '))
 number5 = int(input('Введите пятое число: '))
-list = [number1, number2, number3, number4, number5]
-max = list[0]
+my_list = [number1, number2, number3, number4, number5]
+max = my_list[0]
 i = 0
-while i < len(list):
-    if list[i] > max:
-        max = list[i]
+while i < len(my_list):
+    if my_list[i] > max:
+        max = my_list[i]
     i+= 1
 print('max v.4 = ', max)
 
