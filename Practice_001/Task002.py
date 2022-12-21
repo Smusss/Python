@@ -21,7 +21,7 @@ print('max v.1 = ', max)
 
 my_list = [0, 0, 0, 0, 0]
 for i in range(len(my_list)):
-    my_list[i] = int(input('Введите число № : '))
+    my_list[i] = int(input(f'Введите число №  {i+1}: '))
 print(my_list)
 max = my_list[0]
 for i in range(len(my_list)):
@@ -31,7 +31,7 @@ print('max v.2 = ', max)
 
 my_list = []
 for i in range(5):
-  my_list.append(int(input('Введите число № : ')))
+  my_list.append(int(input(f'Введите число №  {i+1}: ')))
 print(my_list)
 max = my_list[0]
 for i in range(len(my_list)):
@@ -63,3 +63,13 @@ for i in [number1, number2, number3, number4, number5]:
     if i > max:
         max = i
 print('max v.5 = ', max)
+
+my_list = []
+for i in range(5):
+  my_list.append(int(input(f'Введите число № {i+1}: ')))
+print(my_list)
+max = my_list[0]
+for i in range(len(my_list)):
+    if my_list[i] > max:
+        max = my_list[i]
+print('max v.6 = ', max)
