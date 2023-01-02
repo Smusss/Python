@@ -18,3 +18,20 @@ def determine_day (number):
 
 number_of_day = input('Input number of a day (from 1 to 7): ')
 determine_day(number_of_day)
+
+def input_day():
+    while True:
+        try:
+            day = int (input("Input day: "))
+            if 0 < day < 8:
+                return day
+            else:
+                print ("There is not such day")
+        except:
+            print("It is not number")
+
+day = input_day()
+if day >= 6:
+    print('It is holiday')
+else:
+    print('It is weekday')
