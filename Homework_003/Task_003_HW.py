@@ -6,11 +6,11 @@ max, min = 0.00, 1.00
 my_list = []
 for i in range(random.randint(1, 10)):
     my_list.append(round(random.uniform(0,10), 2))
-    temp1 = str(my_list[i]).split('.')
-    temp2 = my_list[i] - float(temp1[0])
-    if temp2 !=0:
-        if temp2 > max:
-            max = temp2
-        if temp2 < min:
-            min = temp2
+    int_part = str(my_list[i]).split('.')[0]
+    fract_part = my_list[i] - int(int_part)
+    if fract_part !=0:
+        if fract_part > max:
+           max = fract_part
+        if fract_part < min:
+           min = fract_part
 print(f'{my_list} => {round(max - min,2)} (max = {round(max,2)}, min = {round(min,2)})')
