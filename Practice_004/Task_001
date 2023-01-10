@@ -1,0 +1,38 @@
+equation = 'A*x**2 + B*x + C = 0'
+new_equation = '3*x**2 - 12*x + 6 = 0'
+import math
+def solution (list):
+    for i in range(len(list)):
+       list[i] = int(list[i])
+    A, B, C = list
+    disc = B**2 - 4*A*C
+    if disc > 0:
+        x1 = ((-B + math.sqrt(disc)) / (2 * A))
+        x2 = ((-B - math.sqrt(disc)) / (2 * A))
+        print('x1 = %.2f \nx2 = %.2f' % (x1, x2))
+    elif disc == 0:
+        x = -B / (2 * A)
+        print ('x = %.2f' % x)
+    else:
+        print ('No way')
+work_str = new_equation.replace(' ', '').replace('*x', ' ').replace('**2', '').replace('=0','').split(' ')
+solution(work_str)
+
+
+new_equation = '3*x**2 -x + 6 = 0'
+def equation(string: str):
+    eq = []
+    string = string.replace(' ', '').replace('=0', '').replace('+', ' ').replace('-', ' -').split(' ')
+    for item in string:
+        if item.startswith('x'):
+            eq.append(1)
+        elif item.startswith('-x'):
+            eq.append(-1)
+        else:
+            eq.append(int(item.split('*x')[0]))
+    return eq
+
+a, b, c = equation(new_equation)
+print(a)
+print(b)
+print(c)
