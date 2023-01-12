@@ -13,3 +13,12 @@ for element in number:
         sum = sum + int(num)
 print(sum, end='. ')
 print(f'Sum of elements = {sum}')
+
+number = input('Input number: ')
+print(f'{number} ->', end=' ')
+sum = 0
+for i in range(len(number)):
+    if number[i].isdigit():
+        sum += int(number[i])
+print(sum, end='. ')
+print(f'Sum of elements = {sum}')
