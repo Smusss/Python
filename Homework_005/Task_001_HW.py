@@ -30,7 +30,7 @@ def check_max_and_over(max, bank, count):
             print('Uncorrect input. Input number!')
 
 print("Hello, sweety! It will be a great game!")
-message = 'How many sweets is in the game? Bank: '
+message = 'How many sweets are in the game? Bank: '
 sweets_bank = check_input_number(message)
 message = 'How many sweets can be taken by turn? Max: '
 max_take = check_input_number(message)
