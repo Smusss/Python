@@ -1,6 +1,5 @@
 from loader import dp, bot
 from aiogram import types
-import emoji
 import random
 
 game = False
@@ -14,7 +13,7 @@ lose = "YOU LOSE...I hope you don't like sweets.\n"
 
 @dp.message_handler(commands=['start'])
 async def mes_start(message:types.Message):
-    print(message, emoji.emojize(':thumbs_up:', language = 'alias'))
+    print(message)
     await message.answer("Hello! Let's play in my favourite game!\n"
                         "Press:\n"
                         "/YES for play\n"
@@ -73,6 +72,7 @@ async def mes_go(message:types.Message):
     global sweets_bank
     global max_take
     global turn
+    global check
     if game is False:
         await bot.send_message(message.from_user.id, 'But you said that you do not want to play. \nTell me /YES, Bro)) ')
     elif sweets_bank <= 0:
@@ -80,6 +80,7 @@ async def mes_go(message:types.Message):
     elif max_take <= 1:
         await bot.send_message(message.from_user.id, 'You did not set the count of sweets can be taken by turn (max take). \nTell me /set_max and count!')
     else:
+        check = True
         if turn == 1:
             await bot.send_message(message.from_user.id, f'Your turn. There are {sweets_bank} sweets on the table. \nHow many sweets will you take?')
         else:
@@ -88,12 +89,11 @@ async def mes_go(message:types.Message):
                 take = sweets_bank
             elif take == 0:
                 take = 1
-                turn = 1
+            turn = 1
             sweets_bank = sweets_bank - take
             await bot.send_message(message.from_user.id, f'The Bot turn. He took {take} sweets.\n'
                                   f'There are {sweets_bank} on the table now.\n'
                                     'How many sweets will you take?')
-        check = True
     return sweets_bank, turn, check
             
 @dp.message_handler()
@@ -103,55 +103,64 @@ async def mes_all(message:types.Message):
     global check
     global sweets_bank
     global max_take
+    global turn
     if check == True:
-        if sweets_bank > 0:
-            if message.text.isdigit():
-                take = check_max_and_over(max_take, sweets_bank, message.text)
-                sweets_bank -= take   
-                await bot.send_message(message.from_user.id, f'You took {take} sweets, '
-                                       f'there are {sweets_bank} sweets on the table now.')
+        turn = 1
+        if message.text.isdigit():
+            take = check_max_and_over(max_take, sweets_bank, message)
+            sweets_bank = sweets_bank - take 
+            await bot.send_message(message.from_user.id, f'You took {take} sweets.\n '
+                                    f'There are {sweets_bank} sweets on the table now.')              
+            if sweets_bank > 0:
                 turn = 0
+                take = sweets_bank % (max_take + 1)
+                if sweets_bank <= max_take:
+                    take = sweets_bank
+                elif take == 0:
+                    take = 1
+                sweets_bank = sweets_bank - take
+                await bot.send_message(message.from_user.id, f'The Bot turn - he took {take} sweets.\n'
+                                                            f'There are {sweets_bank} on the table now.\n\n')
                 if sweets_bank > 0:
-                    take = sweets_bank % (max_take + 1)
-                    if sweets_bank <= max_take:
-                        take = sweets_bank
-                    elif take == 0:
-                        take = 1
-                        turn = 1
-                    sweets_bank = sweets_bank - take
-                    await bot.send_message(message.from_user.id, f'The Bot turn. He took {take} sweets.\n'
-                                                                f'There are {sweets_bank} on the table now.\n'
-                                                                'How many sweets will you take?')
+                    await bot.send_message(message.from_user.id, 'How many sweets will you take?')
                 else:
                     mess = judge(turn)
-                    bot.send_message(message.from_user.id,mess)
+                    await bot.send_message(message.from_user.id,mess)
+
             else:
-                await bot.send_message(message.from_user.id, f'Input number.')
+                mess = judge(turn)
+                await bot.send_message(message.from_user.id,mess)
         else:
-            mess = judge(turn)
-            bot.send_message(message.from_user.id,mess)
+            await bot.send_message(message.from_user.id, f'Input number.')
+        
     else:
         await message.answer(f"We cant't start the game(((\n"
-                             'Press: */YES* and follow the line. I am waiting for you)))')
+                             'Press: /YES and follow the line. I am waiting for you)))')
 
-    def check_max_and_over(max, bank, mess):
-        count = int(mess)
-        if count <= max and count <= bank:
-            return count
-        else:
-            if count > bank and count > max:
-                 bot.send_message(message.from_user.id,(f'Over bank and over max. Try again! Bank is {bank}, max is {max}'))
-            elif count <= max and count > bank:
-                bot.send_message(message.from_user.id,(f'Over bank. Try again! Bank is {bank}'))
-            else:
-                bot.send_message(message.from_user.id,(f'Over max. Try again! Max is {max}'))
+def check_max_and_over(max, bank, message:types.Message): # не реализован механизм проверки - в любом случае возвращается значение
+    count = int(message.text)
+    if count > bank and count > max:
+        #bot.send_message(message.from_user.id,(f'Over bank and over max. Bank is {bank}, max is {max}, you  will take minimal of'))
+        count = min(bank,max)
+    if count <= max and count > bank:
+        #bot.send_message(message.from_user.id,(f'Over bank. Bank is {bank} - i will help you - you will take all))'))
+        count = bank
+    if count > max and count <= bank:
+        #bot.send_message(message.from_user.id,(f'Over max. Max is {max} - take it'))
+        count = max
+    return count
 
-    def judge(turn):
-        if turn == 0:
-            result = 'YOU WIN!!! All sweets are yours!\n'
-        else:
-            result = "YOU LOSE...I hope you don't like sweets.\n"
-        return result
+def judge(turn):
+    if turn != 0:
+        result = 'YOU WIN!!! All sweets are yours!\n'
+    else:
+        result = "YOU LOSE...I hope you don't like sweets.\n"
+    return result
+
+
+
+
+
 
 @dp.message_handler(commands=['OOP'])
 async def mes_oop(message:types.Message):
