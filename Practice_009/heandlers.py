@@ -76,9 +76,9 @@ async def mes_go(message:types.Message):
     if game is False:
         await bot.send_message(message.from_user.id, 'But you said that you do not want to play. \nTell me /YES, Bro)) ')
     elif sweets_bank <= 0:
-        await bot.send_message(message.from_user.id, 'You did not set the count of sweets (sweets bank). \nTell me /set_bank and count!')
+        await bot.send_message(message.from_user.id, 'You did not set the count of sweets (sweets bank). \nTell me /bank and count!')
     elif max_take <= 1:
-        await bot.send_message(message.from_user.id, 'You did not set the count of sweets can be taken by turn (max take). \nTell me /set_max and count!')
+        await bot.send_message(message.from_user.id, 'You did not set the count of sweets can be taken by turn (max take). \nTell me /max and count!')
     else:
         check = True
         if turn == 1:
@@ -92,8 +92,14 @@ async def mes_go(message:types.Message):
             turn = 1
             sweets_bank = sweets_bank - take
             await bot.send_message(message.from_user.id, f'The Bot turn. He took {take} sweets.\n'
-                                  f'There are {sweets_bank} on the table now.\n'
-                                    'How many sweets will you take?')
+                                  f'There are {sweets_bank} on the table now.\n')
+            if sweets_bank > 0:
+                await bot.send_message(message.from_user.id, f'How many sweets will you take?')
+            else:
+                turn = 0
+                mess = judge(turn)
+                await bot.send_message(message.from_user.id,mess)
+                check = False 
     return sweets_bank, turn, check
             
 @dp.message_handler()
@@ -120,7 +126,7 @@ async def mes_all(message:types.Message):
                     take = 1
                 sweets_bank = sweets_bank - take
                 await bot.send_message(message.from_user.id, f'The Bot turn - he took {take} sweets.\n'
-                                                            f'There are {sweets_bank} on the table now.\n\n')
+                                                            f'There are {sweets_bank} sweets on the table now.\n\n')
                 if sweets_bank > 0:
                     await bot.send_message(message.from_user.id, 'How many sweets will you take?')
                 else:
