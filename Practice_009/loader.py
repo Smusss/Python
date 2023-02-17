@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher
 
-bot = Bot('TOKEN', parse_mode='Markdown')
+bot = Bot('TOKEN')
 dp = Dispatcher(bot)
 
 #parse_mode='HTML'
+#, parse_mode='Markdown'
