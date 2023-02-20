@@ -1,28 +1,26 @@
 from loader import dp, bot
 from aiogram import types
 import random
-
-game = False
-sweets_bank = 0
-max_take = 0
-turn = 0
-check = False
+from dict import game_dict as gp
+from dict import statistic_list as sl
 
 win = 'YOU WIN!!! All sweets are yours!\n'
-lose = "YOU LOSE...I hope you don't like sweets.\n"
+lose = "YOU LOSE...I hope you don't like sweets)))\n"
 
 @dp.message_handler(commands=['start'])
 async def mes_start(message:types.Message):
+    global gp
     print(message)
     await message.answer("Hello! Let's play in my favourite game!\n"
                         "Press:\n"
                         "/YES for play\n"
                         "/RULES for show game rules\n"
                         "/NO if you are boring and busy person\n")
+    gp[message.from_user.id] = {'game': False, 'sweets_bank': 0, 'max_take': 0, 'turn': 0, 'check': False, 'take': 0}
 
 @dp.message_handler(commands=['RULES'])
 async def mes_rules(message:types.Message):
-    await message.answer(f'OOkkeeeyy!\n\n'
+    await message.answer(f'OOkkeeeyy, {message.from_user.first_name}!\n\n'
                          'Rules of the game:\n'
                          'On the table is the number of sweets that we will choose at the start.\n'
                          'Two players play by making moves one after the other.\n'
@@ -33,116 +31,125 @@ async def mes_rules(message:types.Message):
 
 @dp.message_handler(commands=['YES'])
 async def mes_yes(message:types.Message):
-    global game
-    global turn
+    global gp
+    if gp [message.from_user.id] == {}: gp[message.from_user.id] = {'game': False, 'sweets_bank': 0, 'max_take': 0, 'turn': 0, 'check': False, 'take': 0}
     await message.answer("Let's get ready to rumble!\n"
                          "How many sweets are in the game?\n"
                          "Input /bank and a count of sweets ")
-    game = True
-    turn = random.randint(0, 1)
-    return game, turn
+    gp[message.from_user.id]['game'] = True
+    gp[message.from_user.id]['turn'] = random.randint(0, 1)
 
 @dp.message_handler(commands=['NO'])
 async def mes_yes(message:types.Message):
     await message.answer("((((((((((((((((((")
-    game = False
-    return game
+    gp[message.from_user.id]['game'] = False
+    return gp
 
 @dp.message_handler(commands=['bank'])
 async def mes_set(message:types.Message):
-    global sweets_bank
-    count = message.text.split()[1]
-    sweets_bank = int(count)
-    await message.answer(f'Sweets bank = {sweets_bank}.\n'
-                          "Input /max and count of max a count of sweets that can be taken by turn.")
-    return sweets_bank
+    global gp
+    if gp[message.from_user.id]['sweets_bank'] !=0: 
+        await message.answer(f"Sweets bank is already full!\nThere are {gp[message.from_user.id]['sweets_bank']} sweets!")
+    else:
+        count = message.text.split()[1]
+        gp[message.from_user.id]['sweets_bank'] = int(count)
+        await message.answer(f'Sweets bank = {int(count)}.\n'
+                            "Input /max and count of max a count of sweets that can be taken by turn.")
+    #print (gp)
+    return gp
 
 @dp.message_handler(commands=['max'])
 async def mes_set(message:types.Message):
-    global max_take
-    count = message.text.split()[1]
-    max_take = int(count)
-    await message.answer(f'So, {max_take} sweets can be taken by turn.\n'
+    global gp
+    if gp[message.from_user.id]['max_take'] !=0: 
+        await message.answer(f"Decided!\nIt is {gp[message.from_user.id]['max_take']}!")
+    else:
+        count = message.text.split()[1]
+        gp[message.from_user.id]['max_take'] = int(count)
+        await message.answer(f'So, {int(count)} sweets can be taken by turn.\n'
                           "Input /GO for start the game.")
-    return max_take
+    #print(gp)
+    return gp
 
 @dp.message_handler(commands=['GO'])
 async def mes_go(message:types.Message):
-    global game
-    global sweets_bank
-    global max_take
-    global turn
-    global check
-    if game is False:
+    global gp
+    game_id = message.from_user.id
+    if gp[game_id]['game'] is False:
         await bot.send_message(message.from_user.id, 'But you said that you do not want to play. \nTell me /YES, Bro)) ')
-    elif sweets_bank <= 0:
+    elif gp[game_id]['sweets_bank'] <= 0:
         await bot.send_message(message.from_user.id, 'You did not set the count of sweets (sweets bank). \nTell me /bank and count!')
-    elif max_take <= 1:
+    elif gp[game_id]['max_take'] <= 1:
         await bot.send_message(message.from_user.id, 'You did not set the count of sweets can be taken by turn (max take). \nTell me /max and count!')
     else:
-        check = True
-        if turn == 1:
-            await bot.send_message(message.from_user.id, f'Your turn. There are {sweets_bank} sweets on the table. \nHow many sweets will you take?')
+        gp[game_id]['check'] = True
+        if gp[game_id]['turn'] == 1:
+            await bot.send_message(message.from_user.id, f"Your turn. There are {gp[game_id]['sweets_bank']} sweets on the table. \nHow many sweets will you take?")
         else:
-            take = sweets_bank % (max_take + 1)
-            if sweets_bank <= max_take:
-                take = sweets_bank
-            elif take == 0:
-                take = 1
-            turn = 1
-            sweets_bank = sweets_bank - take
-            await bot.send_message(message.from_user.id, f'The Bot turn. He took {take} sweets.\n'
-                                  f'There are {sweets_bank} on the table now.\n')
-            if sweets_bank > 0:
+            bot_take = gp[game_id]['sweets_bank'] % (gp[game_id]['max_take'] + 1)
+            if gp[game_id]['sweets_bank'] <= gp[game_id]['max_take']:
+                bot_take = gp[game_id]['sweets_bank']
+            elif bot_take == 0:
+                gp[game_id]['take'] = 1
+            gp[game_id]['turn'] = 1
+            gp[game_id]['sweets_bank'] = gp[game_id]['sweets_bank'] - bot_take
+            await bot.send_message(message.from_user.id, f'The Bot turn. He took {bot_take} sweets.\n'
+                                  f"There are {gp[game_id]['sweets_bank']} on the table now.\n")
+            if gp[game_id]['sweets_bank'] > 0:
                 await bot.send_message(message.from_user.id, f'How many sweets will you take?')
             else:
-                turn = 0
-                mess = judge(turn)
+                gp[game_id]['turn'] = 0
+                mess = judge(gp[game_id]['turn'])
                 await bot.send_message(message.from_user.id,mess)
-                check = False 
-    return sweets_bank, turn, check
+                gp[game_id]['check'] = False
+    #print(gp)
+    return gp
             
 @dp.message_handler()
 async def mes_all(message:types.Message):
     global win
     global lose
-    global check
-    global sweets_bank
-    global max_take
-    global turn
-    if check == True:
-        turn = 1
+    global gp
+    game_id = message.from_user.id
+    if gp[game_id]['check'] == True:
+        gp[game_id]['turn'] = 1
         if message.text.isdigit():
-            take = check_max_and_over(max_take, sweets_bank, message)
-            sweets_bank = sweets_bank - take 
-            await bot.send_message(message.from_user.id, f'You took {take} sweets.\n '
-                                    f'There are {sweets_bank} sweets on the table now.')              
-            if sweets_bank > 0:
-                turn = 0
-                take = sweets_bank % (max_take + 1)
-                if sweets_bank <= max_take:
-                    take = sweets_bank
-                elif take == 0:
-                    take = 1
-                sweets_bank = sweets_bank - take
-                await bot.send_message(message.from_user.id, f'The Bot turn - he took {take} sweets.\n'
-                                                            f'There are {sweets_bank} sweets on the table now.\n\n')
-                if sweets_bank > 0:
+            gp[game_id]['take'] = check_max_and_over(gp[game_id]['max_take'], gp[game_id]['sweets_bank'], message)
+            gp[game_id]['sweets_bank'] = gp[game_id]['sweets_bank'] - gp[game_id]['take'] 
+            await bot.send_message(message.from_user.id, f"You took {gp[game_id]['take']} sweets.\n"
+                                    f"There are {gp[game_id]['sweets_bank']} sweets on the table now.")              
+            if gp[game_id]['sweets_bank'] > 0:
+                gp[game_id]['turn'] = 0
+                bot_take = gp[game_id]['sweets_bank'] % (gp[game_id]['max_take'] + 1)
+                if gp[game_id]['sweets_bank'] <= gp[game_id]['max_take']:
+                    bot_take = gp[game_id]['sweets_bank']
+                elif bot_take == 0:
+                    bot_take = 1
+                gp[game_id]['sweets_bank'] = gp[game_id]['sweets_bank'] - bot_take
+                await bot.send_message(message.from_user.id, f'The Bot turn - he took {bot_take} sweets.\n'
+                                                            f"There are {gp[game_id]['sweets_bank']} sweets on the table now.\n\n")
+                if gp[game_id]['sweets_bank'] > 0:
                     await bot.send_message(message.from_user.id, 'How many sweets will you take?')
                 else:
-                    mess = judge(turn)
+                    mess = judge(gp[game_id]['turn'])[0]
                     await bot.send_message(message.from_user.id,mess)
-
+                    sl.append((game_id,judge(gp[game_id]['turn'])[1]))
+                    gp.pop(game_id)
+                    await bot.send_sticker(message.from_user.id,sticker=r'CAACAgIAAxkBAAEH1E5j86M9hMvDolOUjEtdmEGHZYtXIAACzQMAAu7UDQABtUV4nxtyAUkuBA')
             else:
-                mess = judge(turn)
+                mess = judge(gp[game_id]['turn'])[0]
                 await bot.send_message(message.from_user.id,mess)
+                sl.append((game_id,judge(gp[game_id]['turn'])[1]))
+                gp.pop(game_id)
+                await bot.send_sticker(message.from_user.id,sticker=r'CAACAgIAAxkBAAEH1E5j86M9hMvDolOUjEtdmEGHZYtXIAACzQMAAu7UDQABtUV4nxtyAUkuBA')
         else:
-            await bot.send_message(message.from_user.id, f'Input number.')
-        
+            await bot.send_message(message.from_user.id, f'Input number.')      
     else:
         await message.answer(f"We cant't start the game(((\n"
                              'Press: /YES and follow the line. I am waiting for you)))')
-
+    #print(gp)
+    print(sl)
+    
 def check_max_and_over(max, bank, message:types.Message): # не реализован механизм проверки - в любом случае возвращается значение
     count = int(message.text)
     if count > bank and count > max:
@@ -159,11 +166,11 @@ def check_max_and_over(max, bank, message:types.Message): # не реализо�
 def judge(turn):
     if turn != 0:
         result = 'YOU WIN!!! All sweets are yours!\n'
+        stat = 'winner'
     else:
         result = "YOU LOSE...I hope you don't like sweets.\n"
-    return result
-
-
+        stat = 'loser'
+    return result, stat
 
 
 
@@ -181,6 +188,10 @@ async def mes_hi(message:types.Message):
 async def mes_fu(message:types.Message):
     await bot.delete_message(message.from_user.id, message.message_id)
     await message.answer(f'Bad, bad, bad!')
+
+
+
+
 
 '''
 @dp.message_handler()   # если поставить его наверх - то он не пустит остальных и будет ловить все!
